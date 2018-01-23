@@ -18,6 +18,7 @@ class BaseController extends Controller
 
     public function _initialize()
     {
+        echo 1;die();
         $isLogined = User::isLogined();
         if ($this->needLogin && !$isLogined) {
             $this->redirect('login/index');
