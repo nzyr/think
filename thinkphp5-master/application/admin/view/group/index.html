@@ -1,0 +1,128 @@
+{% extends 'public/base.html' %}
+
+{% block header %}
+<!-- Data Tables -->
+<link href="__static__/hplus/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+<link href="__static__/hplus/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<body class="gray-bg">
+    <div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <button class="btn btn-primary btn-outline ajaxDialog" dialog-size="large" data-title="添加用户组" data-url="addGroup">添加组</button>
+            </div>
+            <div class="ibox-content dataTables_wrapper form-inline">
+                <table class="table table-striped table-bordered table-hover" id="groupTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>组名</th>
+                        <th>描述</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+{% endblock %}
+
+{% block scripts %}
+<script src="__static__/hplus/js/jquery.min.js?v=2.1.4"></script>
+<script src="__static__/hplus/js/plugins/bootbox/bootbox.min.js"></script>
+<script src="__static__/hplus/js/plugins/sweetalert/sweetalert.min.js"></script>
+<script src="__static__/hplus/js/bootstrap.min.js?v=3.3.5"></script>
+<script src="__static__/hplus/js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="__static__/hplus/js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="__static__/hplus/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<script src="__static__/hplus/js/content.min.js?v=1.0.0"></script>
+<script src="__static__/userDefine.js"></script>
+<script>
+    $(document).ready(function(){
+        $("#groupTable").dataTable(
+            {
+                'autoWidth': false,
+                'iDisplayLength': 10,
+                'bServerSide' : true,
+                'aoColumns':[
+                    {
+                        "mData": 'id',
+                        'sClass':'text-center',
+                        'sWidth':'20'
+                    }, {
+                        "mData": 'name',
+                        'sClass':'text-center',
+                        'sWidth':'60',
+                        'bSortable':false
+                    }, {
+                        "mData": 'description',
+                        'sClass':'text-center',
+                        'sWidth':'60',
+                        'bSortable':false
+                    }, {
+                        "mData": 'status',
+                        'sClass':'text-center',
+                        'sWidth':'20',
+                        'bSortable':false
+                    }, {
+                        "mData": 'action',
+                        'sClass':'text-center',
+                        'sWidth':'60',
+                        'bSortable':false
+                    }
+                ],
+                'fnServerParams' : function (aoData) {
+                    var elememts = getElements('groupSearchForm');
+                    $.each(elememts, function(key, val) {
+                        aoData.push( { "name": key, "value": val } );
+                    });
+                },
+                'aoColumnDefs' : [
+                    {
+                        'aTargets' : [4],
+                        'mRender' : function (data, type, full) {
+//                            var isAdmin = '';
+//                            if (full.id ==1) {
+//                                isAdmin = 'disabled = "disabled"';
+//                            }
+                            return '<button class="btn btn-info btn-outline btn-sm ajaxDialog" type="button" dialog-size="large" data-title="编辑用户组" data-url="editGroup" data-params="{gid:'+ full.id +'}"><i class="fa fa-paste"></i>编辑</button> &nbsp;&nbsp;'
+                                +'<button class="btn btn-danger btn-outline btn-sm ajax" type="button" data-title="确定删除用户组: '+ full.name +'" data-url="deleteGroup" data-params="{gid:'+ full.id +'}"><i class="fa fa-trash"></i> <span class="bold">删除</span></button>';
+                        }
+                    }
+                ],
+                'sAjaxSource': '/admin/group/index',
+                'fnServerData': function (sSource, aoData, fnCallback) {
+                    $.ajax({
+                        'type': 'post',
+                        'url': sSource,
+                        'dataType': 'json',
+                        'data': {
+                            aoData: JSON.stringify(aoData)
+                        },
+                        'success': function (resp) {
+                            fnCallback(resp);
+                        }
+                    });
+                },
+            }
+        );
+    });
+    //获取表单参数
+    function getElements(formId) {
+        var elements = {};
+        var data = $(formId).serializeArray();
+        $.each(data, function() {
+            elements[this.name] = this.value;
+        });
+
+        return elements;
+    }
+</script>
+{% endblock %}
